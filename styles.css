@@ -201,7 +201,7 @@ a { color: inherit; }
 }
 
 /* ------------------------------ Steps ------------------------------ */
-.steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.6rem; }
+.steps { list-style: none; padding: 0; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.6rem; }
 .step { border-top: 3px solid var(--green); padding: 1.8rem; }
 .step-num { font-family: var(--mono); font-size: 0.8rem; color: var(--green-deep); letter-spacing: 0.1em; }
 .step-title { margin: 0.8rem 0 0.7rem; font-size: 1.5rem; }
@@ -238,7 +238,7 @@ a { color: inherit; }
 .download-meta { font-size: 0.88rem; color: var(--muted); }
 
 /* ------------------------------ Awards ------------------------------ */
-.awards { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.2rem; }
+.awards { list-style: none; padding: 0; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.2rem; }
 .award { flex: 1 1 320px; max-width: 460px; display: flex; gap: 1.2rem; align-items: flex-start; padding: 1.4rem 1.6rem; }
 .award-place {
   flex: none; width: 3rem; height: 3rem;
