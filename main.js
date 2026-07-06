@@ -113,8 +113,8 @@ document.getElementById("year").textContent = new Date().getFullYear();
         specks.push({
           ox: Math.cos(ang) * dist,
           oy: Math.sin(ang) * dist * 0.7,
-          r: 1 + Math.random() * 2.6,
-          a: 0.35 + Math.random() * 0.4,
+          r: 1.6 + Math.random() * 3.0,
+          a: 0.62 + Math.random() * 0.33,
           phase: Math.random() * Math.PI * 2,
           sway: 2 + Math.random() * 4
         });
@@ -127,7 +127,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
     const srcY = algalBottom;
     const topLimit = total * 0.0;
     bubbles = [];
-    const per = clamp(Math.round(H / 24), 16, 34);
+    const per = clamp(Math.round(H / 13), 32, 66);
     for (let side = 0; side < 2; side++) {
       for (let k = 0; k < per; k++) {
         bubbles.push({
@@ -168,7 +168,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
       const edgeX = b.side === 0 ? 0 : W;
       const dir = b.side === 0 ? 1 : -1;             // inward
       const x = edgeX + dir * prog * b.spread * W + Math.sin(t * 0.8 + b.wob) * b.wamp;
-      const a = 0.30 * (1 - prog * 0.85);            // fade as it rises/spreads
+      const a = 0.34 * (1 - prog * 0.85);            // fade as it rises/spreads
       if (a <= 0.02) continue;
       ctx.beginPath();
       ctx.arc(x, y, b.r, 0, Math.PI * 2);
@@ -187,7 +187,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
       const cx = c.x * W;
       // soft halo binding the group together
       const halo = ctx.createRadialGradient(cx, cy, 0, cx, cy, c.cr * 1.25);
-      halo.addColorStop(0, "rgba(120,150,40,0.16)");
+      halo.addColorStop(0, "rgba(120,150,40,0.09)");
       halo.addColorStop(1, "rgba(120,150,40,0)");
       ctx.fillStyle = halo;
       ctx.fillRect(cx - c.cr * 1.3, cy - c.cr * 1.3, c.cr * 2.6, c.cr * 2.6);
@@ -197,7 +197,11 @@ document.getElementById("year").textContent = new Date().getFullYear();
         const y = cy + s.oy + Math.cos(t * 0.5 + s.phase) * s.sway * 0.6;
         ctx.beginPath();
         ctx.arc(x, y, s.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(156,187,56,${s.a})`;
+        ctx.fillStyle = `rgba(134,166,42,${s.a})`;          // deeper body = crisper edge
+        ctx.fill();
+        ctx.beginPath();                                     // highlight -> reads as a sphere
+        ctx.arc(x - s.r * 0.3, y - s.r * 0.3, s.r * 0.45, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(208,230,120,${Math.min(1, s.a + 0.15)})`;
         ctx.fill();
       }
     }

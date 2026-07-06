@@ -123,7 +123,7 @@ a { color: inherit; }
   justify-content: center;
   padding: 6rem var(--pad) 4rem;
 }
-.hero-inner { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; width: 100%; }
+.hero-inner { position: relative; z-index: 1; max-width: var(--wrap); margin: 0 auto; width: 100%; }
 
 .eyebrow {
   font-family: var(--mono);
@@ -274,6 +274,7 @@ a { color: inherit; }
 .section-support .btn-ghost:hover { background: var(--on-navy); color: var(--navy); }
 
 #contact { background: transparent; color: var(--on-navy); }
+#contact .section-head { text-align: center; }
 #contact .section-eyebrow { color: var(--green-bright); }
 #contact .section-title { color: var(--on-navy); }
 #contact .section-title::after { background: linear-gradient(90deg, var(--green-bright) 55%, var(--algae) 55%); }
