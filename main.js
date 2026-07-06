@@ -1,7 +1,6 @@
-// your code goes here
 /* ============================================================
    MOPP — main.js
-   1) Waterline hero: algae specks aggregate, water clears
+   1) Water column backdrop: gradient + suspended algae spheres
    2) Results charts driven by editable data arrays
    ============================================================ */
 
@@ -18,130 +17,204 @@ const DATA = {
 /* --------------------------------------------------------------------- */
 
 const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-const AQUA = "#16b9ac";
-const ALGAE = "#a6c13a";
+const AQUA = "#0e8a67";   // primary green
+const ALGAE = "#9cbb38";  // algae signal
 
 document.getElementById("year").textContent = new Date().getFullYear();
 
 /* ============================================================
-   1) WATERLINE HERO
+   1) WATER COLUMN BACKDROP
+   Blue surface -> green ALGAL band (with aggregated clumps) ->
+   navy deep. Bubble plumes rise from the sides of section 02.
+   Green + algae are anchored to section 02's real position so
+   they stay aligned at any page height.
    ============================================================ */
-(function waterline() {
+(function column() {
   const canvas = document.getElementById("waterline");
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
-  let W, H, dpr, specks, clumps;
 
-  function makeClumps() {
-    // A few aggregation centers the specks migrate toward.
-    return [
-      { x: 0.14, y: 0.22 }, { x: 0.86, y: 0.30 },
-      { x: 0.22, y: 0.80 }, { x: 0.78, y: 0.72 },
-      { x: 0.5, y: 0.12 }
-    ].map(c => ({ x: c.x * W, y: c.y * H }));
+  let W, H, dpr, total;
+  let algalBottom, heroBottom;     // document-space anchors (px)
+  let STOPS = [];
+  let clumps, bubbles;
+
+  const clamp = (v, lo, hi) => v < lo ? lo : v > hi ? hi : v;
+
+  /* --- gradient: green only across the algal band, navy below --- */
+  function buildStops() {
+    const aB = clamp(algalBottom / total, 0.22, 0.66);   // end of algal band
+    const hB = clamp(heroBottom / total, 0.06, aB - 0.04); // through the hero
+    STOPS = [
+      [0.00, [196, 230, 238]],                 // surface blue
+      [0.04, [180, 224, 212]],                 // blue -> green
+      [Math.max(0.07, hB * 0.55), [126, 205, 160]], // entering green
+      [hB, [104, 197, 150]],                   // green (hero / algae)
+      [(hB + aB) / 2, [96, 190, 146]],         // green mid algal band
+      [aB, [82, 166, 150]],                    // algal band ends
+      [Math.min(aB + 0.13, 0.94), [38, 102, 120]], // OUT of green -> blue-teal
+      [0.88, [19, 58, 90]],                    // dark blue
+      [1.00, [8, 26, 51]]                      // deep navy
+    ];
+    // keep depths strictly increasing
+    for (let i = 1; i < STOPS.length; i++) {
+      if (STOPS[i][0] <= STOPS[i - 1][0]) STOPS[i][0] = STOPS[i - 1][0] + 0.001;
+    }
+  }
+
+  function colorAt(d) {
+    d = clamp(d, 0, 1);
+    for (let i = 0; i < STOPS.length - 1; i++) {
+      const [d0, c0] = STOPS[i], [d1, c1] = STOPS[i + 1];
+      if (d <= d1) {
+        const t = (d - d0) / (d1 - d0 || 1);
+        return `rgb(${Math.round(c0[0] + (c1[0] - c0[0]) * t)},${Math.round(c0[1] + (c1[1] - c0[1]) * t)},${Math.round(c0[2] + (c1[2] - c0[2]) * t)})`;
+      }
+    }
+    return "rgb(8,26,51)";
+  }
+
+  function measure() {
+    total = document.documentElement.scrollHeight;
+    const how = document.getElementById("how");
+    const hero = document.querySelector(".hero");
+    algalBottom = how ? how.offsetTop + how.offsetHeight : total * 0.42;
+    heroBottom = hero ? hero.offsetTop + hero.offsetHeight : total * 0.12;
+    buildStops();
   }
 
   function resize() {
     dpr = Math.min(window.devicePixelRatio || 1, 2);
-    W = canvas.clientWidth;
-    H = canvas.clientHeight;
+    W = window.innerWidth;
+    H = window.innerHeight;
     canvas.width = W * dpr;
     canvas.height = H * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    clumps = makeClumps();
     seed();
   }
 
   function seed() {
-    const n = Math.round(Math.min(160, (W * H) / 5200));
-    specks = [];
-    for (let i = 0; i < n; i++) {
-      const target = clumps[(Math.random() * clumps.length) | 0];
-      specks.push({
-        x: Math.random() * W,
-        y: Math.random() * H,
-        r: 1.4 + Math.random() * 3.2,
-        tx: target.x + (Math.random() - 0.5) * 90,
-        ty: target.y + (Math.random() - 0.5) * 70,
-        phase: Math.random() * Math.PI * 2,
-        speed: 0.006 + Math.random() * 0.01
-      });
-    }
-  }
+    measure();
 
-  function background() {
-    // Cleared water gradient — the "after" state the specks reveal.
-    const g = ctx.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, "#e9f3f1");
-    g.addColorStop(0.55, "#d5ebe7");
-    g.addColorStop(1, "#c3e2dd");
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, W, H);
-
-    // Faint clear channels sweeping across.
-    ctx.globalAlpha = 0.5;
-    for (let i = 0; i < 3; i++) {
-      const y = H * (0.3 + i * 0.24) + Math.sin(t * 0.4 + i) * 12;
-      const grad = ctx.createLinearGradient(0, y - 40, 0, y + 40);
-      grad.addColorStop(0, "rgba(255,255,255,0)");
-      grad.addColorStop(0.5, "rgba(255,255,255,0.55)");
-      grad.addColorStop(1, "rgba(255,255,255,0)");
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, y - 40, W, 80);
+    // --- Algae clumps: aggregated groups through the algal band, ---
+    // --- biased toward the hero so they gather near the top.      ---
+    const algaeTop = total * 0.015;
+    const span = algalBottom - algaeTop;
+    const clumpCount = clamp(Math.round(total / 900), 6, 11);
+    clumps = [];
+    for (let i = 0; i < clumpCount; i++) {
+      const docY = algaeTop + Math.pow(Math.random(), 1.4) * span; // upward bias
+      const cr = 34 + Math.random() * 34;         // clump radius
+      const specks = [];
+      const m = 12 + (Math.random() * 9 | 0);
+      for (let s = 0; s < m; s++) {
+        const ang = Math.random() * Math.PI * 2;
+        const dist = Math.pow(Math.random(), 0.7) * cr;
+        specks.push({
+          ox: Math.cos(ang) * dist,
+          oy: Math.sin(ang) * dist * 0.7,
+          r: 1 + Math.random() * 2.6,
+          a: 0.35 + Math.random() * 0.4,
+          phase: Math.random() * Math.PI * 2,
+          sway: 2 + Math.random() * 4
+        });
+      }
+      clumps.push({ x: 0.06 + Math.random() * 0.88, docY, cr, specks });
     }
-    ctx.globalAlpha = 1;
+
+    // --- Bubble plumes: two columns rising from the bottom of ---
+    // --- section 02, from behind the sides, spreading inward.  ---
+    const srcY = algalBottom;
+    const topLimit = total * 0.0;
+    bubbles = [];
+    const per = clamp(Math.round(H / 24), 16, 34);
+    for (let side = 0; side < 2; side++) {
+      for (let k = 0; k < per; k++) {
+        bubbles.push({
+          side,                                   // 0 = left, 1 = right
+          srcY, topLimit,
+          docY: srcY - Math.random() * (srcY - topLimit), // pre-populate
+          r: 1 + Math.random() * 2.4,
+          speed: 0.5 + Math.random() * 1.0,
+          spread: 0.16 + Math.random() * 0.26,    // how far it fans inward
+          wob: Math.random() * Math.PI * 2,
+          wamp: 5 + Math.random() * 9
+        });
+      }
+    }
   }
 
   let t = 0;
   function frame() {
     t += 0.016;
-    background();
+    const sc = window.scrollY || window.pageYOffset || 0;
 
-    for (const s of specks) {
-      // Aggregation pulse: pull strength eases in and out over time,
-      // so the surface repeatedly gathers and loosens without dispersing.
-      const pull = 0.02 + 0.03 * (0.5 + 0.5 * Math.sin(t * 0.25));
-      s.x += (s.tx - s.x) * pull + Math.cos(s.phase + t) * 0.3;
-      s.y += (s.ty - s.y) * pull + Math.sin(s.phase + t) * 0.3;
-      s.phase += s.speed;
+    // --- water column slice for the current viewport ---
+    const grad = ctx.createLinearGradient(0, 0, 0, H);
+    for (let s = 0; s <= 5; s++) {
+      const yy = s / 5;
+      grad.addColorStop(yy, colorAt((sc + yy * H) / total));
+    }
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
 
+    // --- bubble plumes (behind the algae) ---
+    for (const b of bubbles) {
+      b.docY -= b.speed;
+      if (b.docY < b.topLimit) b.docY = b.srcY;      // recycle at the source
+      const y = b.docY - sc;
+      if (y < -12 || y > H + 12) continue;
+      const prog = (b.srcY - b.docY) / (b.srcY - b.topLimit); // 0 src -> 1 top
+      const edgeX = b.side === 0 ? 0 : W;
+      const dir = b.side === 0 ? 1 : -1;             // inward
+      const x = edgeX + dir * prog * b.spread * W + Math.sin(t * 0.8 + b.wob) * b.wamp;
+      const a = 0.30 * (1 - prog * 0.85);            // fade as it rises/spreads
+      if (a <= 0.02) continue;
       ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = ALGAE;
-      ctx.globalAlpha = 0.55;
+      ctx.arc(x, y, b.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(233,246,241,${a})`;
+      ctx.fill();
+      ctx.beginPath();                               // tiny highlight = bubble
+      ctx.arc(x - b.r * 0.3, y - b.r * 0.3, b.r * 0.4, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${a * 0.8})`;
       ctx.fill();
     }
-    ctx.globalAlpha = 1;
 
-    // Soft halos over dense clumps to read as aggregated mass.
+    // --- algae clumps (aggregated groups) ---
     for (const c of clumps) {
-      const halo = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, 60);
+      const cy = c.docY - sc;
+      if (cy < -c.cr - 30 || cy > H + c.cr + 30) continue;
+      const cx = c.x * W;
+      // soft halo binding the group together
+      const halo = ctx.createRadialGradient(cx, cy, 0, cx, cy, c.cr * 1.25);
       halo.addColorStop(0, "rgba(120,150,40,0.16)");
       halo.addColorStop(1, "rgba(120,150,40,0)");
       ctx.fillStyle = halo;
-      ctx.fillRect(c.x - 60, c.y - 60, 120, 120);
+      ctx.fillRect(cx - c.cr * 1.3, cy - c.cr * 1.3, c.cr * 2.6, c.cr * 2.6);
+      // the individual algae specks
+      for (const s of c.specks) {
+        const x = cx + s.ox + Math.sin(t * 0.6 + s.phase) * s.sway;
+        const y = cy + s.oy + Math.cos(t * 0.5 + s.phase) * s.sway * 0.6;
+        ctx.beginPath();
+        ctx.arc(x, y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(156,187,56,${s.a})`;
+        ctx.fill();
+      }
     }
 
-    if (!REDUCED) requestAnimationFrame(frame);
-  }
-
-  function renderStatic() {
-    // Reduced-motion: draw one settled, cleared frame.
-    background();
-    for (const s of specks) {
-      s.x = s.tx; s.y = s.ty;
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = ALGAE;
-      ctx.globalAlpha = 0.6;
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
+    requestAnimationFrame(frame);
   }
 
   window.addEventListener("resize", resize);
+  window.addEventListener("load", resize);
+  setInterval(measure, 800);   // re-measure if layout shifts (fonts, wraps)
+
   resize();
-  if (REDUCED) renderStatic(); else requestAnimationFrame(frame);
+  if (REDUCED) {
+    canvas.style.display = "none";   // static CSS body gradient carries it
+  } else {
+    requestAnimationFrame(frame);
+  }
 })();
 
 /* ============================================================

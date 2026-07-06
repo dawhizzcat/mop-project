@@ -1,20 +1,28 @@
 /* ============================================================
    MOPP — styles
-   Palette encodes the before -> after: murky algae vs cleared water
+   The whole page is a water column: blue surface -> green mid
+   (with suspended algae spheres) -> deep navy. A fixed canvas
+   paints it; sections are transparent glass over the water.
    ============================================================ */
 :root {
-  --ground: #eef3f2;        /* pale water surface */
-  --ground-2: #e4ece9;      /* faint panel wash */
-  --ink: #0c2b2c;           /* deep pond ink (text) */
-  --deep: #0f3536;          /* deep panel bg */
-  --deep-2: #0a2728;        /* darker still */
-  --aqua: #16b9ac;          /* cleared water — primary action */
-  --aqua-deep: #0e8f85;
-  --algae: #a6c13a;         /* duckweed / algae — signal only */
-  --muted: #5b7472;         /* secondary text */
-  --muted-on-deep: #9dbdba; /* secondary text on dark */
-  --line: #cddad6;          /* hairlines on light */
-  --line-deep: #1f4a4b;     /* hairlines on dark */
+  --ink: #0d2231;            /* navy-teal ink */
+  --lede: #16403a;           /* darker teal for ledes/prose over green */
+  --muted: #3c5850;          /* secondary text on light */
+  --line: rgba(255,255,255,0.5);
+
+  --green: #0e8a67;          /* primary green accent / actions */
+  --green-deep: #0a6b50;     /* readable green for text + eyebrows */
+  --green-bright: #46d3a6;   /* green accent on navy */
+  --algae: #9cbb38;          /* algae spheres / "before" signal */
+
+  --navy: #0e2340;
+  --navy-line: #2a4a78;
+  --on-navy: #dbe6de;
+  --on-navy-muted: #9fbdcf;
+
+  /* frosted glass panel over the water */
+  --glass: rgba(238,245,241,0.60);
+  --glass-border: rgba(255,255,255,0.55);
 
   --wrap: 1120px;
   --pad: clamp(1.25rem, 4vw, 3rem);
@@ -29,9 +37,13 @@
 
 html { scroll-behavior: smooth; }
 
+/* The body gradient is the fallback / reduced-motion column.
+   The fixed canvas paints over it (and adds the algae spheres). */
 body {
   margin: 0;
-  background: var(--ground);
+  background: linear-gradient(to bottom,
+    #c4e6ee 0%, #b4dfce 6%, #78c89f 20%, #68c096 34%, #62bd94 44%,
+    #3f9585 54%, #266a7d 66%, #163f5c 80%, #0c2842 91%, #081a33 100%);
   color: var(--ink);
   font-family: var(--body);
   font-size: 17px;
@@ -42,6 +54,16 @@ body {
 h1, h2, h3 { font-family: var(--display); font-weight: 500; line-height: 1.05; margin: 0; }
 
 a { color: inherit; }
+
+/* ------------------------------ Water column backdrop ------------------------------ */
+.hero-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  pointer-events: none;
+}
 
 /* ------------------------------ Buttons ------------------------------ */
 .btn {
@@ -56,14 +78,14 @@ a { color: inherit; }
   text-decoration: none;
   transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
-.btn:focus-visible { outline: 3px solid var(--aqua); outline-offset: 3px; }
+.btn:focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
 .btn:hover { transform: translateY(-2px); }
 
-.btn-solid { background: var(--aqua); color: #04201e; border: 1.5px solid var(--aqua); }
-.btn-solid:hover { background: var(--aqua-deep); border-color: var(--aqua-deep); }
+.btn-solid { background: var(--green); color: #042019; border: 1.5px solid var(--green); }
+.btn-solid:hover { background: var(--green-deep); border-color: var(--green-deep); }
 
 .btn-ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--ink); }
-.btn-ghost:hover { background: var(--ink); color: var(--ground); }
+.btn-ghost:hover { background: var(--ink); color: #eaf3ef; }
 
 /* ------------------------------ Nav ------------------------------ */
 .nav {
@@ -74,25 +96,21 @@ a { color: inherit; }
   align-items: center;
   gap: 1.5rem;
   padding: 0.85rem var(--pad);
-  background: color-mix(in srgb, var(--ground) 82%, transparent);
+  background: rgba(205,232,236,0.72);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--line);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,0.4);
 }
 .brand { display: flex; align-items: center; gap: 0.55rem; text-decoration: none; }
 .brand-mark {
   width: 15px; height: 15px; border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, var(--algae), var(--aqua) 70%);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--aqua) 25%, transparent);
+  background: radial-gradient(circle at 35% 35%, var(--algae), var(--green) 70%);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--navy) 22%, transparent);
 }
 .brand-word { font-family: var(--display); font-weight: 600; font-size: 1.15rem; letter-spacing: 0.04em; }
 
 .nav-links { display: flex; gap: 1.4rem; margin-left: auto; }
-.nav-links a {
-  text-decoration: none;
-  font-size: 0.9rem;
-  color: var(--muted);
-  transition: color 0.15s ease;
-}
+.nav-links a { text-decoration: none; font-size: 0.9rem; color: var(--muted); transition: color 0.15s ease; }
 .nav-links a:hover { color: var(--ink); }
 .nav-cta { margin-left: 0; }
 
@@ -104,12 +122,6 @@ a { color: inherit; }
   flex-direction: column;
   justify-content: center;
   padding: 6rem var(--pad) 4rem;
-  overflow: hidden;
-}
-.hero-canvas {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  z-index: 0;
 }
 .hero-inner { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; width: 100%; }
 
@@ -118,19 +130,11 @@ a { color: inherit; }
   font-size: 0.78rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--aqua-deep);
+  color: var(--green-deep);
   margin: 0 0 1.4rem;
 }
-.hero-title {
-  font-size: clamp(2.7rem, 8vw, 5.4rem);
-  letter-spacing: -0.02em;
-}
-.hero-sub {
-  max-width: 46ch;
-  margin: 1.6rem 0 2.2rem;
-  font-size: 1.12rem;
-  color: var(--ink);
-}
+.hero-title { font-size: clamp(2.7rem, 8vw, 5.4rem); letter-spacing: -0.02em; }
+.hero-sub { max-width: 46ch; margin: 1.6rem 0 2.2rem; font-size: 1.12rem; color: var(--ink); }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 0.8rem; }
 
 .hero-stats {
@@ -140,7 +144,7 @@ a { color: inherit; }
   gap: 2.4rem;
   margin: 3.2rem 0 0;
   padding: 1.6rem 0 0;
-  border-top: 1px solid var(--line);
+  border-top: 1px solid rgba(13,34,49,0.18);
 }
 .hero-stats li { display: flex; flex-direction: column; gap: 0.15rem; }
 .stat-num { font-family: var(--display); font-size: 1.7rem; font-weight: 600; }
@@ -154,13 +158,10 @@ a { color: inherit; }
   margin: 0;
 }
 
-/* ------------------------------ Sections ------------------------------ */
-.section { padding: clamp(4rem, 9vw, 7rem) var(--pad); }
+/* ------------------------------ Sections (all transparent glass) ------------------------------ */
+.section { padding: clamp(4rem, 9vw, 7rem) var(--pad); background: transparent; }
 .section > * { max-width: var(--wrap); margin-inline: auto; }
-
-.section-deep { background: var(--deep); color: var(--ground); }
-.section-deep .section-lede,
-.section-deep .note { color: var(--muted-on-deep); }
+.section-deep { background: transparent; color: var(--ink); }
 
 .section-head { margin-bottom: 3rem; }
 .section-eyebrow {
@@ -169,182 +170,151 @@ a { color: inherit; }
   font-size: 0.75rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--aqua-deep);
+  color: var(--green-deep);
   margin-bottom: 1rem;
 }
-.section-deep .section-eyebrow { color: var(--aqua); }
 .section-title { font-size: clamp(1.9rem, 4.6vw, 3rem); letter-spacing: -0.015em; max-width: 20ch; }
-.section-lede { margin: 1.1rem 0 0; max-width: 52ch; color: var(--muted); font-size: 1.08rem; }
+.section-title::after {
+  content: "";
+  display: block;
+  width: 46px; height: 3px;
+  margin-top: 1rem;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--navy) 55%, var(--green) 55%);
+}
+.section-title:empty::after { display: none; }
+.section-lede { margin: 1.1rem 0 0; max-width: 52ch; color: var(--lede); font-size: 1.08rem; }
 
 /* ------------------------------ Prose ------------------------------ */
-.prose p { margin: 0 0 1.2rem; }
+.prose p { margin: 0 0 1.2rem; color: var(--lede); }
+.prose strong { color: var(--ink); }
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 2.4rem; }
 .two-col p { margin: 0; }
 
-/* ------------------------------ Steps ------------------------------ */
-.steps {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.6rem;
-}
-.step {
-  border: 1px solid var(--line-deep);
+/* ------------------------------ Frosted glass cards ------------------------------ */
+.step, .chart-card, .award, .build-card, .download {
+  background: var(--glass);
+  backdrop-filter: blur(9px) saturate(1.05);
+  -webkit-backdrop-filter: blur(9px) saturate(1.05);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius);
-  padding: 1.8rem;
-  background: color-mix(in srgb, var(--deep-2) 60%, transparent);
 }
-.step-num { font-family: var(--mono); font-size: 0.8rem; color: var(--aqua); letter-spacing: 0.1em; }
+
+/* ------------------------------ Steps ------------------------------ */
+.steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.6rem; }
+.step { border-top: 3px solid var(--green); padding: 1.8rem; }
+.step-num { font-family: var(--mono); font-size: 0.8rem; color: var(--green-deep); letter-spacing: 0.1em; }
 .step-title { margin: 0.8rem 0 0.7rem; font-size: 1.5rem; }
-.step p { margin: 0; color: var(--muted-on-deep); }
+.step p { margin: 0; color: var(--muted); }
 
 .note {
   margin: 2.4rem auto 0;
-  padding-left: 1.1rem;
-  border-left: 2px solid var(--algae);
+  padding: 0.9rem 1.1rem;
+  border-left: 3px solid var(--algae);
+  background: var(--glass);
+  backdrop-filter: blur(9px);
+  -webkit-backdrop-filter: blur(9px);
+  border-radius: 0 8px 8px 0;
   font-family: var(--mono);
   font-size: 0.86rem;
   max-width: 60ch;
+  color: var(--ink);
 }
 
 /* ------------------------------ Results ------------------------------ */
 .results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.6rem; margin-bottom: 2.4rem; }
-.chart-card {
-  margin: 0;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 1.6rem;
-  background: #fff;
-}
+.chart-card { padding: 1.6rem; }
 .chart-cap { font-family: var(--body); font-weight: 600; font-size: 1rem; margin-bottom: 1rem; }
 .chart { width: 100%; height: auto; display: block; }
 .chart-foot { margin: 0.9rem 0 0; font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
-.chart-foot code { background: var(--ground-2); padding: 0.1em 0.35em; border-radius: 4px; }
+.chart-foot code { background: rgba(13,34,49,0.08); padding: 0.1em 0.35em; border-radius: 4px; }
 
 .downloads { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
-.download {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  text-decoration: none;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 1.3rem;
-  background: var(--ground-2);
-  transition: border-color 0.15s ease, transform 0.15s ease;
-}
-.download:hover { border-color: var(--aqua); transform: translateY(-2px); }
-.download:focus-visible { outline: 3px solid var(--aqua); outline-offset: 2px; }
-.download-kind { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em; color: var(--aqua-deep); }
+.download { display: flex; flex-direction: column; gap: 0.3rem; text-decoration: none; padding: 1.3rem; transition: border-color 0.15s ease, transform 0.15s ease; }
+.download:hover { border-color: var(--green); transform: translateY(-2px); }
+.download:focus-visible { outline: 3px solid var(--green); outline-offset: 2px; }
+.download-kind { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em; color: var(--green-deep); }
 .download-name { font-weight: 600; font-size: 1.05rem; }
 .download-meta { font-size: 0.88rem; color: var(--muted); }
 
 /* ------------------------------ Awards ------------------------------ */
 .awards { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
-.award {
-  display: flex;
-  gap: 1.2rem;
-  align-items: flex-start;
-  border: 1px solid var(--line-deep);
-  border-radius: var(--radius);
-  padding: 1.4rem 1.6rem;
-}
+.award { display: flex; gap: 1.2rem; align-items: flex-start; padding: 1.4rem 1.6rem; }
 .award-place {
-  flex: none;
-  width: 3rem; height: 3rem;
+  flex: none; width: 3rem; height: 3rem;
   display: grid; place-items: center;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--aqua) 18%, transparent);
-  color: var(--aqua);
-  font-family: var(--display);
-  font-weight: 600;
-  font-size: 1.15rem;
+  background: color-mix(in srgb, var(--green) 20%, transparent);
+  color: var(--green-deep);
+  font-family: var(--display); font-weight: 600; font-size: 1.15rem;
 }
 .award h3 { font-size: 1.2rem; margin-bottom: 0.35rem; }
-.award p { margin: 0; color: var(--muted-on-deep); font-size: 0.95rem; }
+.award p { margin: 0; color: var(--muted); font-size: 0.95rem; }
 
 /* ------------------------------ Build ------------------------------ */
-.build-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4rem; }
-.build-card {
-  text-decoration: none;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 1.8rem;
-  background: #fff;
-  transition: transform 0.15s ease, border-color 0.15s ease;
-}
-.build-card:hover { transform: translateY(-3px); border-color: var(--aqua); }
-.build-card:focus-visible { outline: 3px solid var(--aqua); outline-offset: 2px; }
+.build-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.4rem; }
+.build-card { text-decoration: none; padding: 1.8rem; transition: transform 0.15s ease, border-color 0.15s ease; }
+.build-card:hover { transform: translateY(-3px); border-color: var(--green); }
+.build-card:focus-visible { outline: 3px solid var(--green); outline-offset: 2px; }
 .build-card h3 { font-size: 1.35rem; margin-bottom: 0.6rem; }
 .build-card p { margin: 0 0 1.4rem; color: var(--muted); }
-.build-link { font-family: var(--mono); font-size: 0.82rem; color: var(--aqua-deep); }
+.build-link { font-family: var(--mono); font-size: 0.82rem; color: var(--green-deep); }
 
-/* ------------------------------ Support ------------------------------ */
-.section-support {
-  background:
-    radial-gradient(120% 100% at 50% 0%, #12474a 0%, var(--deep-2) 70%);
-  color: var(--ground);
-  text-align: center;
-}
+/* ============================================================
+   THE DEEP — Support + Team + Footer sit in the navy water
+   ============================================================ */
+.section-support { background: transparent; color: var(--on-navy); text-align: center; }
 .support-inner { max-width: 640px; margin-inline: auto; }
-.support-inner .section-eyebrow { color: var(--aqua); }
-.support-inner .section-title { max-width: none; margin-inline: auto; }
-.support-inner .section-lede { color: var(--muted-on-deep); margin-inline: auto; }
+.support-inner .section-eyebrow { color: var(--green-bright); }
+.support-inner .section-title { max-width: none; margin-inline: auto; color: var(--on-navy); }
+.support-inner .section-title::after { margin-inline: auto; background: linear-gradient(90deg, var(--green-bright) 55%, var(--algae) 55%); }
+.support-inner .section-lede { color: var(--on-navy-muted); margin-inline: auto; }
 .support-inner .hero-actions { justify-content: center; margin-top: 2rem; }
-.section-support .btn-ghost { color: var(--ground); border-color: var(--ground); }
-.section-support .btn-ghost:hover { background: var(--ground); color: var(--ink); }
+.section-support .btn-ghost { color: var(--on-navy); border-color: var(--on-navy); }
+.section-support .btn-ghost:hover { background: var(--on-navy); color: var(--navy); }
 
-/* ------------------------------ Team ------------------------------ */
+#contact { background: transparent; color: var(--on-navy); }
+#contact .section-eyebrow { color: var(--green-bright); }
+#contact .section-title { color: var(--on-navy); }
+#contact .section-title::after { background: linear-gradient(90deg, var(--green-bright) 55%, var(--algae) 55%); }
+
 .team { display: grid; grid-template-columns: 1fr 1fr; gap: 1.6rem; max-width: 640px; margin-inline: auto; }
 .member {
-  border: 1px solid var(--line);
+  border: 1px solid var(--navy-line);
   border-radius: var(--radius);
   padding: 1.8rem;
   text-align: center;
-  background: var(--ground-2);
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 .member-avatar {
   width: 3.4rem; height: 3.4rem; margin: 0 auto 1rem;
   display: grid; place-items: center;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, var(--algae), var(--aqua) 75%);
+  background: radial-gradient(circle at 35% 35%, var(--algae), var(--green) 75%);
   color: #04201e; font-family: var(--display); font-weight: 600; font-size: 1.3rem;
 }
-.member h3 { font-size: 1.3rem; }
-.member p { margin: 0.3rem 0 0; color: var(--muted); font-size: 0.92rem; }
-.contact-line { text-align: center; margin: 2.4rem auto 0; color: var(--muted); }
-.contact-line a { color: var(--aqua-deep); }
+.member h3 { font-size: 1.3rem; color: var(--on-navy); }
+.member p { margin: 0.3rem 0 0; color: var(--on-navy-muted); font-size: 0.92rem; }
+.contact-line { text-align: center; margin: 2.4rem auto 0; color: var(--on-navy-muted); }
+.contact-line a { color: var(--green-bright); }
 
 /* ------------------------------ Footer ------------------------------ */
-.footer {
-  background: var(--deep-2);
-  color: var(--ground);
-  text-align: center;
-  padding: 3rem var(--pad);
-}
+.footer { background: transparent; color: var(--on-navy); text-align: center; padding: 3rem var(--pad); }
 .footer .brand-word { display: block; font-size: 1.4rem; margin-bottom: 0.8rem; }
-.footer p { margin: 0.3rem 0 0; color: var(--muted-on-deep); font-size: 0.9rem; }
+.footer p { margin: 0.3rem 0 0; color: var(--on-navy-muted); font-size: 0.9rem; }
 .footer-small { font-family: var(--mono); font-size: 0.75rem; }
 
 /* ------------------------------ Responsive ------------------------------ */
 @media (max-width: 820px) {
   .nav-links { display: none; }
-  .two-col,
-  .steps,
-  .results-grid,
-  .downloads,
-  .awards,
-  .build-grid,
-  .team { grid-template-columns: 1fr; }
+  .two-col, .steps, .results-grid, .downloads, .awards, .team { grid-template-columns: 1fr; }
   .hero-stats { gap: 1.6rem 2rem; }
 }
 
 /* ------------------------------ Reduced motion ------------------------------ */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .btn:hover,
-  .download:hover,
-  .build-card:hover { transform: none; }
+  .btn:hover, .download:hover, .build-card:hover { transform: none; }
 }
