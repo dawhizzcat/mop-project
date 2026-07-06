@@ -185,12 +185,19 @@ document.getElementById("year").textContent = new Date().getFullYear();
       const cy = c.docY - sc;
       if (cy < -c.cr - 30 || cy > H + c.cr + 30) continue;
       const cx = c.x * W;
-      // soft halo binding the group together
-      const halo = ctx.createRadialGradient(cx, cy, 0, cx, cy, c.cr * 1.25);
-      halo.addColorStop(0, "rgba(120,150,40,0.09)");
-      halo.addColorStop(1, "rgba(120,150,40,0)");
-      ctx.fillStyle = halo;
-      ctx.fillRect(cx - c.cr * 1.3, cy - c.cr * 1.3, c.cr * 2.6, c.cr * 2.6);
+      // darker aura underneath lifts the whole clump off the light water
+      const aura = ctx.createRadialGradient(cx, cy, 0, cx, cy, c.cr * 1.4);
+      aura.addColorStop(0, "rgba(58,84,22,0.26)");
+      aura.addColorStop(0.7, "rgba(58,84,22,0.10)");
+      aura.addColorStop(1, "rgba(58,84,22,0)");
+      ctx.fillStyle = aura;
+      ctx.fillRect(cx - c.cr * 1.5, cy - c.cr * 1.5, c.cr * 3, c.cr * 3);
+      // green core mass gives the sphere a solid body
+      const core = ctx.createRadialGradient(cx, cy, 0, cx, cy, c.cr);
+      core.addColorStop(0, "rgba(122,154,44,0.44)");
+      core.addColorStop(1, "rgba(122,154,44,0)");
+      ctx.fillStyle = core;
+      ctx.fillRect(cx - c.cr, cy - c.cr, c.cr * 2, c.cr * 2);
       // the individual algae specks
       for (const s of c.specks) {
         const x = cx + s.ox + Math.sin(t * 0.6 + s.phase) * s.sway;

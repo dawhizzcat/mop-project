@@ -59,8 +59,6 @@ a { color: inherit; }
 .hero-canvas {
   position: fixed;
   inset: 0;
-  width: 100vw;
-  height: 100vh;
   z-index: -1;
   pointer-events: none;
 }
@@ -122,6 +120,7 @@ a { color: inherit; }
   flex-direction: column;
   justify-content: center;
   padding: 6rem var(--pad) 4rem;
+  text-align: center;
 }
 .hero-inner { position: relative; z-index: 1; max-width: var(--wrap); margin: 0 auto; width: 100%; }
 
@@ -134,13 +133,14 @@ a { color: inherit; }
   margin: 0 0 1.4rem;
 }
 .hero-title { font-size: clamp(2.7rem, 8vw, 5.4rem); letter-spacing: -0.02em; }
-.hero-sub { max-width: 46ch; margin: 1.6rem 0 2.2rem; font-size: 1.12rem; color: var(--ink); }
-.hero-actions { display: flex; flex-wrap: wrap; gap: 0.8rem; }
+.hero-sub { max-width: 46ch; margin: 1.6rem auto 2.2rem; font-size: 1.12rem; color: var(--ink); }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 0.8rem; justify-content: center; }
 
 .hero-stats {
   list-style: none;
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 2.4rem;
   margin: 3.2rem 0 0;
   padding: 1.6rem 0 0;
@@ -163,7 +163,7 @@ a { color: inherit; }
 .section > * { max-width: var(--wrap); margin-inline: auto; }
 .section-deep { background: transparent; color: var(--ink); }
 
-.section-head { margin-bottom: 3rem; }
+.section-head { margin-bottom: 3rem; text-align: center; }
 .section-eyebrow {
   display: block;
   font-family: var(--mono);
@@ -173,17 +173,17 @@ a { color: inherit; }
   color: var(--green-deep);
   margin-bottom: 1rem;
 }
-.section-title { font-size: clamp(1.9rem, 4.6vw, 3rem); letter-spacing: -0.015em; max-width: 20ch; }
+.section-title { font-size: clamp(1.9rem, 4.6vw, 3rem); letter-spacing: -0.015em; max-width: 20ch; margin-inline: auto; }
 .section-title::after {
   content: "";
   display: block;
   width: 46px; height: 3px;
-  margin-top: 1rem;
+  margin: 1rem auto 0;
   border-radius: 2px;
   background: linear-gradient(90deg, var(--navy) 55%, var(--green) 55%);
 }
 .section-title:empty::after { display: none; }
-.section-lede { margin: 1.1rem 0 0; max-width: 52ch; color: var(--lede); font-size: 1.08rem; }
+.section-lede { margin: 1.1rem auto 0; max-width: 52ch; color: var(--lede); font-size: 1.08rem; }
 
 /* ------------------------------ Prose ------------------------------ */
 .prose p { margin: 0 0 1.2rem; color: var(--lede); }
@@ -238,8 +238,8 @@ a { color: inherit; }
 .download-meta { font-size: 0.88rem; color: var(--muted); }
 
 /* ------------------------------ Awards ------------------------------ */
-.awards { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
-.award { display: flex; gap: 1.2rem; align-items: flex-start; padding: 1.4rem 1.6rem; }
+.awards { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 1.2rem; }
+.award { flex: 1 1 320px; max-width: 460px; display: flex; gap: 1.2rem; align-items: flex-start; padding: 1.4rem 1.6rem; }
 .award-place {
   flex: none; width: 3rem; height: 3rem;
   display: grid; place-items: center;
