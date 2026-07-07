@@ -90,7 +90,16 @@ document.getElementById("year").textContent = new Date().getFullYear();
     canvas.width = W * dpr;
     canvas.height = H * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    seed();
+    measure();
+    if (!clumps) {
+      seed();
+    } else {
+      // keep existing positions (no teleport on mobile URL-bar resize)
+      for (const c of clumps) {
+        c.x = clamp(c.x, c.cr, Math.max(c.cr, W - c.cr));
+        c.y = clamp(c.y, c.cr, Math.max(c.cr, H - c.cr));
+      }
+    }
   }
 
   function seed() {
@@ -99,11 +108,9 @@ document.getElementById("year").textContent = new Date().getFullYear();
     // --- Algae clumps: aggregated groups through the algal band, ---
     // --- biased toward the hero so they gather near the top.      ---
     algaeTop = total * 0.015;
-    const span = algalBottom - algaeTop;
     const clumpCount = clamp(Math.round(total / 900), 6, 11);
     clumps = [];
     for (let i = 0; i < clumpCount; i++) {
-      const docY = algaeTop + Math.pow(Math.random(), 1.4) * span; // upward bias
       const cr = 34 + Math.random() * 34;         // clump radius
       const specks = [];
       const m = 12 + (Math.random() * 9 | 0);
@@ -120,10 +127,10 @@ document.getElementById("year").textContent = new Date().getFullYear();
         });
       }
       clumps.push({
-        px: (0.06 + Math.random() * 0.88) * W,      // horizontal position (px)
-        docY,                                       // vertical position (doc space)
-        vx: (Math.random() - 0.5) * 0.7,            // gentle drift
-        vy: (Math.random() - 0.5) * 0.5,
+        x: cr + Math.random() * Math.max(1, W - 2 * cr),   // screen-space position
+        y: cr + Math.random() * Math.max(1, H - 2 * cr),
+        vx: (Math.random() - 0.5) * 0.7,                   // gentle drift
+        vy: (Math.random() - 0.5) * 0.6,
         cr, specks
       });
     }
@@ -186,33 +193,32 @@ document.getElementById("year").textContent = new Date().getFullYear();
       ctx.fill();
     }
 
-    // --- algae clumps (aggregated groups, floating + bouncing) ---
+    // --- algae clumps: float in SCREEN space so scrolling never makes ---
+    // --- them lag/jitter; fade in only while the algal band is on view. ---
+    const fadeRange = H * 0.6;
+    const vis = Math.max(0, Math.min(
+      clamp((sc + H - algaeTop) / fadeRange, 0, 1),   // band has entered from below
+      clamp((algalBottom - sc) / fadeRange, 0, 1)     // band hasn't scrolled past above
+    ));
     for (const c of clumps) {
-      // drift
-      c.px += c.vx;
-      c.docY += c.vy;
-      // bounce off the left/right viewport edges
-      if (c.px < c.cr) { c.px = c.cr; c.vx = Math.abs(c.vx); }
-      else if (c.px > W - c.cr) { c.px = W - c.cr; c.vx = -Math.abs(c.vx); }
-      // bounce off the top/bottom of the algal band
-      const topB = algaeTop + c.cr, botB = algalBottom - c.cr;
-      if (botB <= topB) { c.docY = (algaeTop + algalBottom) / 2; }
-      else if (c.docY < topB) { c.docY = topB; c.vy = Math.abs(c.vy); }
-      else if (c.docY > botB) { c.docY = botB; c.vy = -Math.abs(c.vy); }
-
-      const cy = c.docY - sc;
-      if (cy < -c.cr - 30 || cy > H + c.cr + 30) continue;
-      const cx = c.px;
+      c.x += c.vx;
+      c.y += c.vy;
+      if (c.x < c.cr) { c.x = c.cr; c.vx = Math.abs(c.vx); }
+      else if (c.x > W - c.cr) { c.x = W - c.cr; c.vx = -Math.abs(c.vx); }
+      if (c.y < c.cr) { c.y = c.cr; c.vy = Math.abs(c.vy); }
+      else if (c.y > H - c.cr) { c.y = H - c.cr; c.vy = -Math.abs(c.vy); }
+      if (vis <= 0.01) continue;
+      const cx = c.x, cy = c.y;
       // darker aura underneath lifts the whole clump off the light water
       const aura = ctx.createRadialGradient(cx, cy, 0, cx, cy, c.cr * 1.4);
-      aura.addColorStop(0, "rgba(58,84,22,0.26)");
-      aura.addColorStop(0.7, "rgba(58,84,22,0.10)");
+      aura.addColorStop(0, `rgba(58,84,22,${0.26 * vis})`);
+      aura.addColorStop(0.7, `rgba(58,84,22,${0.10 * vis})`);
       aura.addColorStop(1, "rgba(58,84,22,0)");
       ctx.fillStyle = aura;
       ctx.fillRect(cx - c.cr * 1.5, cy - c.cr * 1.5, c.cr * 3, c.cr * 3);
       // green core mass gives the sphere a solid body
       const core = ctx.createRadialGradient(cx, cy, 0, cx, cy, c.cr);
-      core.addColorStop(0, "rgba(122,154,44,0.44)");
+      core.addColorStop(0, `rgba(122,154,44,${0.44 * vis})`);
       core.addColorStop(1, "rgba(122,154,44,0)");
       ctx.fillStyle = core;
       ctx.fillRect(cx - c.cr, cy - c.cr, c.cr * 2, c.cr * 2);
@@ -222,11 +228,11 @@ document.getElementById("year").textContent = new Date().getFullYear();
         const y = cy + s.oy + Math.cos(t * 0.5 + s.phase) * s.sway * 0.6;
         ctx.beginPath();
         ctx.arc(x, y, s.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(134,166,42,${s.a})`;          // deeper body = crisper edge
+        ctx.fillStyle = `rgba(134,166,42,${s.a * vis})`;          // deeper body = crisper edge
         ctx.fill();
-        ctx.beginPath();                                     // highlight -> reads as a sphere
+        ctx.beginPath();                                          // highlight -> reads as a sphere
         ctx.arc(x - s.r * 0.3, y - s.r * 0.3, s.r * 0.45, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(208,230,120,${Math.min(1, s.a + 0.15)})`;
+        ctx.fillStyle = `rgba(208,230,120,${Math.min(1, s.a + 0.15) * vis})`;
         ctx.fill();
       }
     }
