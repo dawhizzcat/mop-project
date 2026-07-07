@@ -260,6 +260,17 @@ a { color: inherit; }
 .build-card p { margin: 0 0 1.4rem; color: var(--muted); }
 .build-link { font-family: var(--mono); font-size: 0.82rem; color: var(--green-deep); }
 
+/* Sections 04 & 05 sit where the water has turned blue-teal, so their
+   headings need light text (the frosted cards keep their own dark text). */
+#recognition .section-eyebrow,
+#build .section-eyebrow { color: var(--green-bright); }
+#recognition .section-title,
+#build .section-title { color: var(--on-navy); }
+#recognition .section-lede,
+#build .section-lede { color: var(--on-navy-muted); }
+#recognition .section-title::after,
+#build .section-title::after { background: linear-gradient(90deg, var(--green-bright) 55%, var(--algae) 55%); }
+
 /* ============================================================
    THE DEEP — Support + Team + Footer sit in the navy water
    ============================================================ */

@@ -35,7 +35,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
   const ctx = canvas.getContext("2d");
 
   let W, H, dpr, total;
-  let algalBottom, heroBottom;     // document-space anchors (px)
+  let algalBottom, heroBottom, algaeTop;     // document-space anchors (px)
   let STOPS = [];
   let clumps, bubbles;
 
@@ -98,7 +98,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
 
     // --- Algae clumps: aggregated groups through the algal band, ---
     // --- biased toward the hero so they gather near the top.      ---
-    const algaeTop = total * 0.015;
+    algaeTop = total * 0.015;
     const span = algalBottom - algaeTop;
     const clumpCount = clamp(Math.round(total / 900), 6, 11);
     clumps = [];
@@ -119,7 +119,13 @@ document.getElementById("year").textContent = new Date().getFullYear();
           sway: 2 + Math.random() * 4
         });
       }
-      clumps.push({ x: 0.06 + Math.random() * 0.88, docY, cr, specks });
+      clumps.push({
+        px: (0.06 + Math.random() * 0.88) * W,      // horizontal position (px)
+        docY,                                       // vertical position (doc space)
+        vx: (Math.random() - 0.5) * 0.7,            // gentle drift
+        vy: (Math.random() - 0.5) * 0.5,
+        cr, specks
+      });
     }
 
     // --- Bubble plumes: two columns rising from the bottom of ---
@@ -180,11 +186,23 @@ document.getElementById("year").textContent = new Date().getFullYear();
       ctx.fill();
     }
 
-    // --- algae clumps (aggregated groups) ---
+    // --- algae clumps (aggregated groups, floating + bouncing) ---
     for (const c of clumps) {
+      // drift
+      c.px += c.vx;
+      c.docY += c.vy;
+      // bounce off the left/right viewport edges
+      if (c.px < c.cr) { c.px = c.cr; c.vx = Math.abs(c.vx); }
+      else if (c.px > W - c.cr) { c.px = W - c.cr; c.vx = -Math.abs(c.vx); }
+      // bounce off the top/bottom of the algal band
+      const topB = algaeTop + c.cr, botB = algalBottom - c.cr;
+      if (botB <= topB) { c.docY = (algaeTop + algalBottom) / 2; }
+      else if (c.docY < topB) { c.docY = topB; c.vy = Math.abs(c.vy); }
+      else if (c.docY > botB) { c.docY = botB; c.vy = -Math.abs(c.vy); }
+
       const cy = c.docY - sc;
       if (cy < -c.cr - 30 || cy > H + c.cr + 30) continue;
-      const cx = c.x * W;
+      const cx = c.px;
       // darker aura underneath lifts the whole clump off the light water
       const aura = ctx.createRadialGradient(cx, cy, 0, cx, cy, c.cr * 1.4);
       aura.addColorStop(0, "rgba(58,84,22,0.26)");
