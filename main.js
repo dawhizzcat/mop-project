@@ -7,12 +7,12 @@
 /* ---- EDIT YOUR REAL DATA HERE ---------------------------------------
    Replace these example arrays with your measurements.
    coverage: percent of surface covered by algae over time
-   larvae:   larvae counts, treated vs control                        */
+   Algae:   Algal Turbidity (Absorbance of Light), treated vs control (Voltage)                     */
 const DATA = {
   coverage: [82, 78, 60, 41, 27, 15, 9],           // % over 7 checkpoints
   coverageLabels: ["0h", "6h", "12h", "24h", "36h", "48h", "72h"],
-  larvae: { treated: [120, 74, 31, 8], control: [118, 121, 115, 119] },
-  larvaeLabels: ["Control", "0.16A", "0.18A", "0.20A"]
+  larvae: { treated: [47.98217939, 15.12437702, 93.55588787, 73.88034057], control: [47.98217939, 47.98217939, 47.98217939, 47.98217939] },
+  larvaeLabels: ["0V", "5V", "7.2V", "10V"]
 };
 /* --------------------------------------------------------------------- */
 
