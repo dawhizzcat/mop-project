@@ -228,7 +228,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
         const y = cy + s.oy + Math.cos(t * 0.5 + s.phase) * s.sway * 0.6;
         ctx.beginPath();
         ctx.arc(x, y, s.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(134,166,42,${s.a * vis})`;          // deeper body = crisper edge
+        ctx.fillStyle = `rgba(50,130,90,${s.a * vis})`;          // deeper body = crisper edge
         ctx.fill();
         ctx.beginPath();                                          // highlight -> reads as a sphere
         ctx.arc(x - s.r * 0.3, y - s.r * 0.3, s.r * 0.45, 0, Math.PI * 2);
