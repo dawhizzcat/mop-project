@@ -218,8 +218,8 @@ document.getElementById("year").textContent = new Date().getFullYear();
       ctx.fillRect(cx - c.cr * 1.5, cy - c.cr * 1.5, c.cr * 3, c.cr * 3);
       // green core mass gives the sphere a solid body
       const core = ctx.createRadialGradient(cx, cy, 0, cx, cy, c.cr);
-      core.addColorStop(0, `rgba(122,154,44,${0.44 * vis})`);
-      core.addColorStop(1, "rgba(122,154,44,0)");
+      core.addColorStop(0, `rgba(40,110,75,${0.44 * vis})`);
+      core.addColorStop(1, "rgba(40,110,75,0)");
       ctx.fillStyle = core;
       ctx.fillRect(cx - c.cr, cy - c.cr, c.cr * 2, c.cr * 2);
       // the individual algae specks
