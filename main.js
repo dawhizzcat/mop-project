@@ -211,8 +211,8 @@ document.getElementById("year").textContent = new Date().getFullYear();
       const cx = c.x, cy = c.y;
       // darker aura underneath lifts the whole clump off the light water
       const aura = ctx.createRadialGradient(cx, cy, 0, cx, cy, c.cr * 1.4);
-      aura.addColorStop(0, `rgba(58,84,22,${0.26 * vis})`);
-      aura.addColorStop(0.7, `rgba(58,84,22,${0.10 * vis})`);
+      aura.addColorStop(0, `rgba(30,70,40,${0.26 * vis})`);
+      aura.addColorStop(0.7, `rgba(30,70,40,${0.10 * vis})`);
       aura.addColorStop(1, "rgba(58,84,22,0)");
       ctx.fillStyle = aura;
       ctx.fillRect(cx - c.cr * 1.5, cy - c.cr * 1.5, c.cr * 3, c.cr * 3);
