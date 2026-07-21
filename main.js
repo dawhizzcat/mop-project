@@ -12,7 +12,7 @@ const DATA = {
   coverage: [82, 78, 60, 41, 27, 15, 9],           // % over 7 checkpoints
   coverageLabels: ["0h", "6h", "12h", "24h", "36h", "48h", "72h"],
   larvae: { treated: [120, 74, 31, 8], control: [118, 121, 115, 119] },
-  larvaeLabels: ["Day 0", "Day 2", "Day 4", "Day 6"]
+  larvaeLabels: ["Control", "0.16A", "0.18A", "0.20A"]
 };
 /* --------------------------------------------------------------------- */
 
