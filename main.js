@@ -18,7 +18,7 @@ const DATA = {
 
 const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const AQUA = "#0e8a67";   // primary green
-const ALGAE = "#9cbb38";  // algae signal
+const ALGAE = "#47ac5f";  // algae signal
 
 document.getElementById("year").textContent = new Date().getFullYear();
 
